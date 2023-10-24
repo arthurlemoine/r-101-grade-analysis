@@ -1,0 +1,22 @@
+---
+title: "Grade analysis"
+author: "Arthur Lemoine"
+format: html
+editor: visual
+---
+
+```{r}
+library(here)
+here::i_am("grade101.Rproj")
+library(dplyr)
+library(tidyr)
+library(ggplot2)
+library(vroom)
+```
+
+### Question 1
+
+```{r}
+grades <- vroom(here('grades.csv'))
+```
+
