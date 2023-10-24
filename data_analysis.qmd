@@ -3,6 +3,10 @@ title: "Grade analysis"
 author: "Arthur Lemoine"
 format: html
 editor: visual
+execute:
+  echo: false
+  warning: false
+  keep-md: true
 ---
 
 ```{r}
@@ -41,4 +45,108 @@ exam_summ |>
 st_no_exam <- sum(is.na(grades$Exam))
 ```
 
-There are `r st_no_exam`students who did not take the exam. 
+There are `r st_no_exam` students who did not take the exam.
+
+### Question 4
+
+```{r}
+grades |> 
+  ggplot(aes(x = Exam)) +
+  geom_histogram(bins = 20, na.rm = TRUE) +
+  labs(
+    title = "Distribution of Exam Grades",
+    x = "Exam Grade",
+    y = "Frequency")
+```
+
+### Question 5
+
+I decided not to remove NAs because they are still in a group (even though they didn't pass the exam). 
+
+```{r}
+n_group <- grades |>
+  group_by(Group) |>
+  summarise(Count = n())
+
+n_group|> 
+  knitr::kable(format = "markdown")
+```
+
+### Question 6
+
+```{r}
+n_group |> ggplot(aes(x = Group, y = Count)) +
+  geom_col() +
+  labs(
+    title = "Number of Students in Each Group",
+    x = "Group",
+    y = "Number of Students"
+  ) + 
+  theme(axis.text.x = element_text(angle = 90))
+```
+
+### Question 7
+
+This one is clearly unreadble. 
+
+```{r}
+grades |> ggplot(aes(x = Exam, fill = Group)) +
+  geom_histogram(bins = 20, position = "dodge") +
+  labs(
+    title = "Distribution of Exam Grades by Group",
+    x = "Exam Grade",
+    y = "Frequency"
+  )
+```
+
+```{r}
+grades |> ggplot(aes(x = Group, y = Exam, fill = Group)) +
+  geom_boxplot() +
+  labs(
+    title = "Box Plots of Exam Grades by Group",
+    x = "Group",
+    y = "Exam Grade") + 
+  theme(axis.text.x = element_text(angle = 90))
+```
+
+### Question 8
+```{r}
+n_missed_exam <- grades |>
+  group_by(Group) |>
+  summarise("Missed exam count" = sum(is.na(Exam)))
+
+n_missed_exam |> 
+  knitr::kable(format = "markdown")
+```
+
+### Question 9
+
+```{r}
+n_missed_exam |> ggplot(aes(x = Group, y = `Missed exam count`)) +
+  geom_col() +
+  labs(
+    title = "Number of Students Who Missed the Exam by Group",
+    x = "Group",
+    y = "Number of Students"
+  ) + 
+  theme(axis.text.x = element_text(angle = 90))
+```
+
+### Question 10
+
+```{r}
+grades_LF <- grades |>
+  pivot_longer(
+    cols = -c(Id, Group),
+    names_to = "name",
+    values_to = "value")
+```
+
+### Question 11
+
+```{r}
+n_miss_grades <- grades_LF |>
+  group_by(Id) |>
+  summarise(`Missing Grades` = sum(is.na(value)))
+```
+
