@@ -14,6 +14,7 @@ library(here)
 here::i_am("grade101.Rproj")
 library(dplyr)
 library(tidyr)
+library(stringr)
 library(ggplot2)
 library(vroom)
 ```
@@ -61,7 +62,7 @@ grades |>
 
 ### Question 5
 
-I decided not to remove NAs because they are still in a group (even though they didn't pass the exam). 
+I decided not to remove NAs because they are still in a group (even though they didn't pass the exam).
 
 ```{r}
 n_group <- grades |>
@@ -87,7 +88,7 @@ n_group |> ggplot(aes(x = Group, y = Count)) +
 
 ### Question 7
 
-This one is clearly unreadble. 
+This one is clearly unreadble.
 
 ```{r}
 grades |> ggplot(aes(x = Exam, fill = Group)) +
@@ -110,6 +111,7 @@ grades |> ggplot(aes(x = Group, y = Exam, fill = Group)) +
 ```
 
 ### Question 8
+
 ```{r}
 n_missed_exam <- grades |>
   group_by(Group) |>
@@ -150,4 +152,34 @@ n_miss_grades <- grades_LF |>
   summarise(`Missing Grades` = sum(is.na(value)))
 ```
 
+### Question 12
 
+```{r}
+n_miss_grades |> ggplot(aes(x = factor(`Missing Grades`))) +
+  geom_bar() +
+  labs(
+    title = "Distribution of Missing Grades per Student",
+    x = "Number of Missing Grades",
+    y = "Count")
+```
+
+### Question 13
+
+```{r}
+n_missed_exam_LF <- grades_LF |>
+  filter(name == "Exam" & is.na(value)) |>
+  group_by(Group) |>
+  summarise(`Missed exam count` = n())
+
+n_missed_exam_LF |> 
+  knitr::kable(format = "markdown")
+```
+
+### Question 14
+
+```{r}
+n_miss_online_test <- grades_LF |>
+  filter(str_starts(name, "Online_MCQ_")) |>
+  group_by(Id) |>
+  summarise(`Missed online MCQ count` = sum(is.na(value)))
+```
