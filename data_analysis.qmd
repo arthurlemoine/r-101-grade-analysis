@@ -124,7 +124,7 @@ n_missed_exam |>
 ### Question 9
 
 ```{r}
-n_missed_exam |> ggplot(aes(x = Group, y = `Missed exam count`)) +
+n_missed_exam |> ggplot(aes(x = Group, y = `Missed exam count`, fill = Group)) +
   geom_col() +
   labs(
     title = "Number of Students Who Missed the Exam by Group",
@@ -183,3 +183,62 @@ n_miss_online_test <- grades_LF |>
   group_by(Id) |>
   summarise(`Missed online MCQ count` = sum(is.na(value)))
 ```
+
+### Question 15
+
+```{r}
+n_miss_online_test_bis <- grades |>
+  select(starts_with("Online_MCQ"), Id) |>
+  rowwise() |>
+  mutate(missed_MCQ = sum(is.na(c_across()))) |>
+  select(Id, missed_MCQ)
+
+
+grades_bis <- grades |>
+  left_join(n_miss_online_test_bis, by = "Id")
+
+
+ggplot(data = grades_bis, aes(x = as.factor(missed_MCQ), y = Exam, group = as.factor(missed_MCQ))) +
+  geom_boxplot() +
+  labs(
+    title = "Distribution of Exam Grades conditioned by Missing Online Tests",
+    x = "Number of Missing Online Tests",
+    y = "Exam Grade") 
+```
+
+### Question 16
+
+```{r}
+missed_T_F <- grades |>
+  select(Id, starts_with("MCQ_")) |>
+  rowwise() |>
+  mutate(Missed = any(is.na(c_across()))) |>
+  select(Id, Missed)
+```
+
+### Question 17
+
+```{r}
+missed_pct <- grades |>
+  select(Id, Group) |>
+  left_join(missed_T_F, by = "Id") |>
+  group_by(Group) |>
+  summarise(Pct_missed = mean(Missed))
+```
+
+### Question 18
+```{r}
+avg_gr_grade <- grades |>
+  group_by(Group) |>
+  summarise(Avg_Exam_Grade = mean(Exam, na.rm = TRUE))
+
+pct_avg_merged <- inner_join(missed_pct, avg_gr_grade, by = "Group")
+
+ggplot(data = pct_avg_merged, aes(x = Pct_missed, y = Avg_Exam_Grade)) +
+  geom_point() +
+  labs(
+    title = "Average Exam Grade per Group vs. Percentage of Missed MCQ Grade",
+    x = "Percentage of Missed MCQ Grade",
+    y = "Average Exam Grade")
+```
+We don't see any clear correlation between those two variables.
